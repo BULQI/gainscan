@@ -24,7 +24,7 @@ devtools::setup(path=".")
 #setwd("/home/feng/Feng/hg/PAST")
 setwd( "E:/feng/LAB/hg/proteinArray_Masa/PAST")
 #setwd("C:\\Feng\\LAB\\hg\\proteinArray_Masa\\PAST")
-setwd( "C:\\Users\\ffeng\\Documents\\Feng\\hg\\PAST")
+setwd( "C:\\Users\\ffeng\\Documents\\Feng\\hg\\gainscan")
 
 devtools::document()
 
