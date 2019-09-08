@@ -1,0 +1,5 @@
+Things to do for CPAA r package:
+1.read raw data
+2.model/normalize the intra-run arrays  
+3.compare statistically the differentially expressed genes
+4.test the polyReactivity by (???)

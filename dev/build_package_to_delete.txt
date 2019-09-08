@@ -1,0 +1,79 @@
+#code to run R package
+#namespace to import export
+#example for each methods
+#feng's directory
+#run this on every startup of the R console
+
+projectPath<-"h:/feng/LAB/hg/proteinArray_Masa/PAST"
+holderPath<-"h:/feng/LAB/hg/proteinArray_Masa"
+
+setwd( "h:/feng/LAB/hg/proteinArray_Masa")
+
+#to create new R package, with new folder created using the name fields
+package.skeleton(name = "PAST",
+                 code_files = "PAST.R") 
+#same thing as skeleton				 
+devtools:create(path="PAST" )
+
+#same thing as skeleton, but use the current folder, and assume the package name as the current folder name
+setwd( "h:/feng/LAB/hg/proteinArray_Masa/PAST")
+devtools::setup(path=".")				 
+
+
+#call roxygen2 to process the helper pages from the roxygen comments
+#setwd("/home/feng/Feng/hg/PAST")
+setwd( "E:/feng/LAB/hg/proteinArray_Masa/PAST")
+#setwd("C:\\Feng\\LAB\\hg\\proteinArray_Masa\\PAST")
+setwd( "C:\\Users\\ffeng\\Documents\\Feng\\hg\\PAST")
+
+devtools::document()
+
+#remove
+remove.packages("PAST")
+
+#feng's directory to call to install
+#setwd( "E:/feng/LAB/hg/proteinArray_Masa")
+#setwd("/home/feng/Feng/hg/")
+#setwd("C:\\Feng\\LAB\\hg\\proteinArray_Masa")
+#install from local directory, but this is different from install.packages
+#cat("need to check to see array.aggregate vs. gainAdjust.aggregate functions\n\a");
+#
+devtools::install(".")
+
+#install from local using install.packages utility
+setwd( "E:/feng/LAB/hg/proteinArray_Masa")
+install.packages(c("PAST"),repos=NULL, type="source")
+
+#load the package
+library(PAST)
+
+
+################
+#update the text data
+dataPath<-"h:\\feng\\LAB\\MSI\\AbSynthesis\\proteinArray\\Run2015_10_08"
+rawDataPath<-paste(projectPath,"/inst/extdata",sep="")
+
+#this below one finds the exact incidence of "Analysis of 1153-PMT650.txt"
+#with format like "Analysis [word] [word]-[word].txt", the length of word fixed
+#actually [word] could only be zero or nonzero length, more like to show once or zero times
+filelst<-list.files(dataPath,"^Analysis\\s\\w*\\s\\w*-\\w*.txt$", full.names=TRUE)
+
+#this one below finds "Analysis( [word1]){n}-[word2].txt" word1 could be zero or more 
+#times, that word including the leading space could be zero or many times.
+#word2 could be zero or more length, meaning 1 or zero times. It doesn't include space
+filelst<-list.files(dataPath,"^Analysis(\\s\\w*)*-\\w*.txt$", full.names=TRUE)
+
+#compared with above, the space could be there or not. almost identical.
+ filelst<-list.files(dataPath,"^Analysis(\\s*\\w*)*-\\w*.txt$", full.names=TRUE)
+ 
+ #could be many words with hypen, above there will only be exactly one hyphen
+filelst<-list.files(dataPath,"^Analysis(\\s*\\w*-*\\w*)*-\\w*.txt$", full.names=TRUE)
+
+#could be many words with hypen,and could be many hypens in a run. also can no hypen 
+#connected words
+filelst<-list.files(dataPath,"^Analysis(\\s*\\w*-*\\w*)*.txt$", full.names=TRUE)
+
+file.copy(filelst, rawDataPath)
+#call to show the man page of the class.
+?APPPA
+

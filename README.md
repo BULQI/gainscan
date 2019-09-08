@@ -1,1 +1,1 @@
-gai-scan, an R software package pressing protein array data
+gai-scan, an R software package processing protein array data
