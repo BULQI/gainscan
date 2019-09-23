@@ -29,7 +29,7 @@ setwd( "C:\\Users\\ffeng\\Documents\\Feng\\hg\\gainscan")
 devtools::document()
 
 #remove
-remove.packages("PAST")
+remove.packages("gainscan")
 
 #feng's directory to call to install
 #setwd( "E:/feng/LAB/hg/proteinArray_Masa")
