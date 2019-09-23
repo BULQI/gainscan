@@ -6,9 +6,9 @@
 # the following section is used to act like a holder for
 # importing libraryies
 # package limma is necessary for EList
-#' @title an empty file to import necessary libraries 
+# # ' @title an empty file to import necessary libraries 
 #' @import limma 
-#' @name _empty
+## ' @name _empty
 NULL
 
 #first define the top most function to drive the analysis
