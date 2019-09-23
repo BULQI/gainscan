@@ -28,3 +28,7 @@ Collate:
     'stats.R'
 RoxygenNote: 6.1.1.9000
 Roxygen: list(markdown = TRUE)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

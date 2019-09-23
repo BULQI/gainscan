@@ -1,0 +1,23 @@
+---
+title: "gainscan"
+author: "Feng, Feng"
+date: "`r Sys.Date()`"
+output: 
+    pdf_document:
+        fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{gainscan}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(gainscan)
+```

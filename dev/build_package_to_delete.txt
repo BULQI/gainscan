@@ -47,6 +47,14 @@ install.packages(c("gainscan"),repos=NULL, type="source")
 #load the package
 library(gainscan)
 
+#creating vignette
+usethis::use_vignette("gainscan")
+
+#build and view it in the source "doc" directory 
+devtools::build_vignettes();
+
+#to build and install 
+devtools::install(".", build_vignettes = TRUE) #to build vignette and then install, 
 
 ################
 #update the text data
