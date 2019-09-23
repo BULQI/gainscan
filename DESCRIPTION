@@ -1,6 +1,6 @@
 Package: gainscan
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.01
+Version: 0.0.1.0
 Authors@R: person("Feng", "Feng", email = "ffeng@BU.edu", role = c("aut", "cre"))
 Author: Feng Feng [aut, cre]
 Maintainer: Feng Feng <ffeng@bu.edu>
@@ -13,7 +13,7 @@ Description: An R package tool to read, preprocess and analyze protoarray data
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: TRUE
-URL: https://github.com/ffeng23/PAST
+URL: https://github.com/BULQI/gainscan
 SystemRequirements: NA
 Collate: 
     'data.R'
@@ -26,5 +26,5 @@ Collate:
     'normalize.R'
     'residualFunc_PMT_Power.R'
     'stats.R'
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1.9000
 Roxygen: list(markdown = TRUE)

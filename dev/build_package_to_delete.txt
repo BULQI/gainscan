@@ -13,7 +13,7 @@ setwd( "h:/feng/LAB/hg/proteinArray_Masa")
 package.skeleton(name = "PAST",
                  code_files = "PAST.R") 
 #same thing as skeleton				 
-devtools:create(path="PAST" )
+devtools:create(path="gainscan")
 
 #same thing as skeleton, but use the current folder, and assume the package name as the current folder name
 setwd( "h:/feng/LAB/hg/proteinArray_Masa/PAST")
@@ -22,9 +22,9 @@ devtools::setup(path=".")
 
 #call roxygen2 to process the helper pages from the roxygen comments
 #setwd("/home/feng/Feng/hg/PAST")
-setwd( "E:/feng/LAB/hg/proteinArray_Masa/PAST")
+setwd( "E:/feng/LAB/hg/proteinArray_Masa/gainscan")
 #setwd("C:\\Feng\\LAB\\hg\\proteinArray_Masa\\PAST")
-setwd( "C:\\Users\\ffeng\\Documents\\Feng\\hg\\gainscan")
+#setwd( "C:\\Users\\ffeng\\Documents\\Feng\\hg\\gainscan")
 
 devtools::document()
 
@@ -42,10 +42,10 @@ devtools::install(".")
 
 #install from local using install.packages utility
 setwd( "E:/feng/LAB/hg/proteinArray_Masa")
-install.packages(c("PAST"),repos=NULL, type="source")
+install.packages(c("gainscan"),repos=NULL, type="source")
 
 #load the package
-library(PAST)
+library(gainscan)
 
 
 ################
