@@ -9,7 +9,11 @@ Install the latest code from github
 ```
 devtools::install_github("BULQI/gainscan")
 ```
-
+Build the vignette and install the code from github
+```
+devtools::install_github("BULQI/gainscan", build_vignettes=TRUE)
+```
 ## Bug Reporting
 
 Email to ffeng@bu.edu
+

@@ -2,6 +2,8 @@
 title: "gainscan"
 author: "Feng, Feng"
 date: "`r Sys.Date()`"
+header-includes:
+    - \usepackage{mathtools}
 output: 
     pdf_document:
         fig_caption: yes
@@ -11,13 +13,70 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  tidy=FALSE,
+  engine='R'
 )
 ```
+# 1. Overview
+  Gain-Scan is an R software package implemented to integrate the protein microarray data acquired under different photomultiplier (PMT) gain settings. The integration of the multi-gain array data significantly reduces the technical variations in the protein microarray data acquisition. It avoid the trouble of selecting one single optimal PMT gain setting for imaging the arrays. It aims to achieving the goal of avoiding saturation of the strong signals while maximizing the detection of the low singles at the same time.
+	
+  Besides the gainscan modeling and integration, the package currently also include other functions to preprocess/nomalize the protein array data. It can do the following,
+  
+   1. Import/read the ".GPR" input file.
+   
+   1. Background-orrect the array data.
+   
+   1. Normalize the array data using the robust linear model (RLM)
+	
+# 2. Theory and Model
 
-```{r setup}
-library(gainscan)
+  In order to integrate the data acquired with different PMT settings, a power function model with baseline has been developed as    
+		$$ 
+		log (Y) = \left\{
+				\begin{array}{ll}
+					log(\beta+\phi v^\delta)+\epsilon & \quad \mbox {for }  (\beta+\phi v^\delta) \leq \Lambda \\
+					log (\Lambda) & \quad \mbox {for } (\beta+\phi v^\delta) > \Lambda \\
+				\end{array}
+			\right.
+		$$
+  $Y$ is the signal intensity of each feature points; $v$ is the gain voltage for acquiring the image; $\delta$ is the number of dynodes in the PMT; $\beta$ is the _background_ signal (including the so-called dark current as well as other sources of signal independent of the light influx); $\phi$ is the light influx determined by the interaction between the feature proteins and analytes to be detected. Finally, $\Lambda$ is the maximum representable signal intensity. This is commonly expected in the analog-to-digital transformation and implemented in the hardware. In a 16-bit digital instrument signals are stored as 16-bit integer and values larger than $\Lambda=2^{16}-1$ are presented as 65535 ($2^{16}-1$)
+
+  In this mobel, we assume that the parameters $\beta$, $\phi$ and $\sigma$ are independent of the spot, constant within an array and variable among arrays. We vary the gain voltage $v$ and observe the signal intensity $Y$. Then the model is fitted on the data of $v$ and $Y$ to estimate the parameter $\phi$, the light flux. This light influx is taken to be proportional to the quantity of analyte bound to the give spot. Now, the final statistical model is written as 
+		$$
+			log(Y_{ij})=\left \{
+			\begin{array}{ll}
+					log(\beta_{j}+\phi_{i} v^{\delta_{j}})+\epsilon_{ij} & \quad \mbox {for }  (\beta_{j}+\phi_{j} v^{\delta_{j}})e^{\epsilon_{ij}} \leq \Lambda \\
+					log (\Lambda) & \quad \mbox {for } (\beta_{j}+\phi_{j} v^{\delta_{j}})e^{\epsilon_{ij}} > \Lambda \\
+				\end{array}
+			\right.
+		$$
+		$$
+			i=1,2,...,n; j=1,2,...,m;
+		$$
+  where $i$ is the $ith$ feature spot on the array; $n$ is the total number of feature on the array; $j$ is the $jth$ array and $m$ is the total number of arrays used in the experiments.
+  
+  The model is fitted using the Levenberg-Marquardt nonlinear least-squres algorithm (the MINPACK package).
+
+
+# 3. A Short Example
+
+## 1. Installation
+  The package can be installed from the github repository
+```{r, eval=FALSE}
+	devtools::install_github("BULQI/gainscan")
 ```
+To build the vignette and install the code from github, please incude the "build_vignettes" option,
+
+```{r, eval=FALSE}
+	devtools::install_github("BULQI/gainscan", build_vignettes=TRUE)
+```
+## 2. Loading _gainscan_ and importing data
+  After installation, the package can be loaded by
+```{r, eval=T}  
+    library(gainscan)
+```
+## 3. To Be Added.
