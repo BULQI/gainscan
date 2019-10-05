@@ -49,7 +49,8 @@
 #' \item normalize between arrays, by a linear model on log-transformed data \cr\cr
 #'ToDo:
 #' \item run differential analysis to statistically identify the positive interacting protein features 
-#    	with correction for multiple comparison
+#'    	with correction for multiple comparison
+#' \item add a section to describe in vignettes about the differential analysis and FDR.
 #'	}
 #'\cr
 #'

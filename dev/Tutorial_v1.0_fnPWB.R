@@ -14,8 +14,8 @@
 ##====================
 
 #load libraries
-library(PAA)
-library(PAST)
+#library(PAA)
+library(gainscan)
 library(limma)
 library(minpack.lm)
 
@@ -24,12 +24,25 @@ library(minpack.lm)
  #now try to read the gpr files
  gpr <- "E:\\feng\\LAB\\MSI\\AbSynthesis\\proteinArray\\protoArray\\11_28_2016\\iggisotyprctrl_feng_12052016"
   #gpr <- "/home/feng/Windows/D/feng/LAB/MSI/AbSynthesis/proteinArray/protoArray/11_28_2016/iggisotyprctrl_feng_12052016"
+ 
+ #now try to read the gpr files from demo dummy, 2block array data
+ gpr<-system.file("extdata", package="gainscan");
  targets <- list.files(path=gpr,
-					pattern = "^target_second.txt", full.names = TRUE)
-#ad.elist <- loadGPR(gpr.path=gpr, targets.path=targets, array.type="ProtoArray",aggregation="none")
+					pattern = "target.txt", full.names = TRUE)
+ tbl.targets<-read.table(targets, header=T,sep="\t")
+ print(tbl.targets)
+
+ setwd(gpr);
+ adata.elist <- importGPR(dir.GPR=gpr, design.file=targets, type="ProtoArray")
+
+ #the real regular data
+ #targets <- list.files(path=gpr,
+ # 					pattern = "^target_second.txt", full.names = TRUE)
+
+ #ad.elist <- loadGPR(gpr.path=gpr, targets.path=targets, array.type="ProtoArray",aggregation="none")
 		#save(ad.elistBC,array1.C,array1.E, file= "AD_BC.RData", compress="xz")
-#load data
- load(paste(gpr,"/AD_Acquire5th.RData",sep=""))
+ #load data
+ #load(paste(gpr,"/AD_Acquire5th.RData",sep=""))
  
  ######==========start doing the 5PL fitting 
  ###visualize the data first to see whether it is a good model
@@ -43,7 +56,7 @@ library(minpack.lm)
  
 	#save(ad.elistBC, file= "AD_BC_6thPAST.RData", compress="xz")
  #load data
- load("AD_BC_6thPAST.RData")
+ #load("AD_BC_6thPAST.RData")
   x<-pmts 
 
 aggregated<-F
@@ -52,6 +65,7 @@ aggregated<-F
 #....<----+++++++++++++++++++++++++
 #+++++++++now we fit with no BC data+++++++++
 ad.elistBC<-ad.elist;
+ad.elistBC<-adata.elist;
 #++++++++++++++++++++++++++++++++++++
 
 
@@ -61,13 +75,13 @@ ad.elistBC<-ad.elist;
 		object<-ad.elistBC
 #now we have the data read in. 
 #for the testing at this stage, let's process only one array.
-index.firstArr<-c(1:9)
+index.firstArr<-c(1:9)+18
 object$E<-object$E[,index.firstArr];
 object$C<-object$C[,index.firstArr];
 object$targets<-object$targets[index.firstArr,];
 object.oneArray<-object
 #now getting a blocked data to do fitting.
-num.block<-24
+num.block<-2
 block.start<-1
 cgenes<-object$cgenes;
 genes<-object$genes;
@@ -88,7 +102,7 @@ inits<-gainAdjust_prepareInits_Pbp(y=object$C, x, aggregated=F, data.log=F)
 #B<-20;
 #Ys<-f_PowerBaselinePMT(c(B, 2^16-1, inits$inits.phi[1], inits$inits.delta),x);
 
-B<-log(1.1)
+B<-log(min(object$C))
 pars<-c(B, inits$inits.delta, inits$inits.phi)
 y<-object$C
 y<-gainAdjust.aggregate(y, mode="geometric")
@@ -166,7 +180,7 @@ p_elists<-gainAdjust_fit_Pbp(object=ad.elistBC, x=x,
 								# B=pmt_baseline, 
 								B=log(30),
 								G=pmt_saturated, #phi, delta,
-								block.size=4, fit.mode="control",
+								block.size=2, fit.mode="control",
 								 residual.mode="log",
 								debug=T )
 								

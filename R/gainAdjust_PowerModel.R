@@ -53,6 +53,8 @@
 
 
 #------------start the code------------
+#import the code for doing the fitting.
+#'@import minpack.lm
 
 ##first define constants
 #Maximizing the Dynamic Range of a Scan
@@ -376,7 +378,7 @@ minimum.phi<- -6.5;#-7 previously #smallest possible phi value. it is not possib
 			log<-match.arg(log);
 		}
 		plot(c(xmin*0.95,xmax*1.05), c(ymin*0.95,ymax*1.05), bg = "black", #cex = 0.5, 
-				main="PMT Power Model Fitting", type="n",log=log
+				main="Model Fitting", type="n",log=log
 				, xlab="PMT voltage(v)", ylab="Intensity"
 				)
 		#plot(c(xmin,xmax+0.3), c((0.1),(66535)+5000), bg = "black", cex = 0.5, main="data", type="n")
@@ -493,7 +495,7 @@ gainAdjust_plot_Pbp<-function(LMfit,y, x, data.aggregated=FALSE,
 		ymax<-max(y)
 		
 		plot(c(xmin*0.95,xmax*1.05), c(ymin*0.95,ymax*1.05), #cex = 0.1, #bg = "black",  
-			main="PMT Power Model Fitting", type="n",log=log
+			main="Modle Fitting (Overlaid)", type="n",log=log
 			, xlab="PMT voltage(v)", ylab="Intensity"
 			)
 		#plot(c(xmin,xmax+0.3), c((0.1),(66535)+5000), bg = "black", cex = 0.5, main="data", type="n")
@@ -660,8 +662,12 @@ gainAdjust_plot_Pbp<-function(LMfit,y, x, data.aggregated=FALSE,
 		ft$par[-c(1,2)]<-pars;
 		#sink();
 		#do plotting for debugging purpose
-		if(debug)
+		if(TRUE) #this used to be if(debug)
 		{
+			op<-par(
+				mfrow=c(1,2),
+				pty="s"
+				)
 			#now plot the fitting.
 			gainAdjust_plot_Pbp_raw(LMfit=ft,y=y, x=x, data.aggregated=T,
 						G=G, log="xy",
@@ -680,6 +686,7 @@ gainAdjust_plot_Pbp<-function(LMfit,y, x, data.aggregated=FALSE,
 						ref.index=1,  #used to indicate which line is used as the reference, all other ones is shifted towards it.
 						log="xy", type="l",
 						filename=paste0(data.name, "shift.jpg"));
+			par(op)
 		}
 		
 		return(ft);

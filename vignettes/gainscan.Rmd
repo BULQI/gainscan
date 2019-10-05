@@ -11,6 +11,35 @@ vignette: >
   %\VignetteIndexEntry{gainscan}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+references:
+- id: Sboner2009
+  title: Robust-linear-model normalization to reduce technical variability in functional protein microarrays.
+  author:
+  - family: Sboner
+    given: Andrea
+  - family: Karpikov
+    given: Alexander
+  - family: Chen
+    given: Gengxin
+  - family: Smith
+    given: Michael
+  - family: Dawn
+    given: Mattoon
+  - family: Freeman-Cook
+    given: Lisa
+  - family: Schweitzer
+    given: Barry
+  - family: Gerstein
+    given: Mark B.
+  container-title: Journal of Proteome Research
+  URL: 'https://pubs.acs.org/doi/abs/10.1021/pr900412k'
+  DOI: 10.1021/pr900412k
+  publisher: American Chemical Society
+  issued:
+    year: 2009
+    month: 10
+  volume: 8
+  issue: 12
 ---
 
 ```{r setup, include = FALSE}
@@ -74,9 +103,167 @@ To build the vignette and install the code from github, please incude the "build
 ```{r, eval=FALSE}
 	devtools::install_github("BULQI/gainscan", build_vignettes=TRUE)
 ```
-## 2. Loading _gainscan_ and importing data
+## 2. Loading _gainscan_
   After installation, the package can be loaded by
 ```{r, eval=T}  
     library(gainscan)
 ```
-## 3. To Be Added.
+## 3. Importing data
+  To import/read array GPR files, we rely on a design/target file. A design file is a metadata file describing the information about the GPR files.It is in a table format (tab-delimitted text file). Each row of the table is about one GPR file. It defines the file name, directory, the array name, group information, etc.The package comes with a set of sample input files. The design file can be viewed by the following r code. 
+  ```{r, eval=T}
+	gpr<-system.file("extdata", package="gainscan")
+	targets <- list.files(path=gpr,
+					pattern = "target.txt", full.names = TRUE)
+	tbl.targets<-read.table(targets, header=T,sep="\t")
+	print(tbl.targets)
+  ```
+  As indicated in the above design file, there are a set of GPR files containing the array. Those GPR files contain the data of three ProtoArrays hybridized with the isotype IgG. Each array has been imaged nine times under different photomultiplier gain voltages (ranging from 250 up to 650). For demonstration purpose, we only include in the file the data of the first two blocks of each array. To read/import those data, we need to feed in the design file as
+  ```{r, eval=T}
+	adata.elist <- importGPR(dir.GPR=gpr, design.file=targets, type="ProtoArray")
+  ```
+## 4. Background correction (optional)
+  After importing GPR data, we could do the background correction to clean up the data. It removes from the feature signals the background noises, which are obtained through sampling the area surrounding the protein feature spots. In this package, we provide a wrapper function _bc_ to achieve this. It simply calls the backgroud correction function in the _limma_ package.
+  ```{r, eval=T}
+	adata.elistBC <- bc(adata.elist, method="normexp",
+		normexp.method="saddle")
+  ```
+  we can see the differences between the raw and background-corrected data by running the below code.
+  ```{r, eval=T}
+	#comparing the array expression data before and after background correction
+	cbind("before"=adata.elist$E[1:8,1], "after"=adata.elistBC$E[1:8,1])
+	
+	#comparing the array control expression data before and after background correction
+	cbind("before"=adata.elist$C[1:8,1], "after"=adata.elistBC$C[1:8,1])
+  ```
+## 5. Model fitting to estimate the incident light signal with multiple gain data 
+  As indicated above, the array data were acquired with nine different gain voltages. Therefore, a power function model with baseline could be applied to estimate incident light signals (see the section _Theory and model). We first prepare the initial values for the parameters.
+  ```{r, eval=T}
+	#nine PMT gain settings
+	pmts<-seq(250, 650, by=50)
+	
+	#estimating the initial values for parameter based on data
+	
+	B<-log(min(adata.elist$C)); #the initial value of the background
+						#this has to be as close as possible, otherwise might affect the fitting.
+	G<-2^16-1; # G is fixed 
+	
+	#calling to do the fitting
+	#optionally we could call to run fitting using the background-corrected object, adata.elistBC
+	p_elists<-gainAdjust_fit_Pbp(object=adata.elist, 
+								x=pmts,  
+								B=B, G=G, 
+								block.size=2, fit.mode="control",
+								 residual.mode="log",
+								debug=F )
+  ```
+  The return object contains information about model parameters and the estimated incident light signals integrating the information acquired under the multiple different PMT gain settings.
+  ```{r,eval=T}
+	names(p_elists)
+	
+	#doing plot of the density, before and after fitting.
+	op<-par(
+				mfrow=c(2,1),
+				pty="m",
+				mar=c(4,4,0.1,0.5),
+				mgp=c(1.5,0.5,0)
+			)
+	 
+	 plot(density(log(adata.elist$E[,17])),main="",
+		xlab="Intensity (log)",lty=1
+		)
+	 lines(density(log(adata.elist$E[,8])),lty=1)
+	 lines(density(log(adata.elist$E[,26])),lty=1)
+	 legend(x=6.5,y=0.8, legend="signal intensities (raw)",lty=1)
+	 
+	 plot(density(p_elists$elist$E[,1]), main="",
+		xlab="incident light Intensity (log)",lty=2
+		)
+	 lines(density(p_elists$elist$E[,2]),lty=2)
+	 lines(density(p_elists$elist$E[,3]),lty=2)
+	 legend(x=-5.7,y=3.5, legend="incident light intensities (fitted)",lty=2)
+	par(op)
+  ```
+## 6. Normalization using the robust linear model.
+  The processed data now can be normalized across different arrays using the robust linear model [@Sboner2009].
+```{r, eval=T}
+	#start plotting the distribution of signal intensity
+	object.pbp<-scaleByDelta(p_elists$elist, mean(p_elists$delta))  #<-scale it, not necessary, but just try
+	#now do the RLM normalization
+	object.pbp.norm<-normalizeArrays.RLM(data=object.pbp,controls="Anti-HumanIgG",
+					method="RLM", #only implemented RLM for now
+					log=F, log.base=exp(1), coding="Deviation"
+		)
+
+	object.raw.600<-adata.elist
+	object.raw.600$E<-adata.elist$E[,c(8,17,26)];
+	object.raw.600$C<-adata.elist$C[,c(8,17,26)];
+	object.raw.norm<-normalizeArrays.RLM(data=object.raw.600,controls="Anti-HumanIgG",
+				method="RLM", #only implemented RLM for now
+				log=TRUE, log.base=exp(1), coding="Deviation"
+			)
+	#doing plot of the density
+	op<-par(
+				mfrow=c(2,1),
+					pty="m",
+					mar=c(4,4,0.1,0.5),
+					mgp=c(1.5,0.5,0)
+			)
+	 
+	 plot(density((object.raw.norm$E[,3])),main="",
+		xlab="intensity (log)",
+		)
+	 lines(density((object.raw.norm$E[,1])))
+	 lines(density((object.raw.norm$E[,2])))
+	 legend(x=5.5,y=1.0, legend="signal intensities (raw+RLM)",lty=1)
+	 
+	 plot(density(object.pbp.norm$E[,1]), main="",
+		xlab="incident light signal (log)",lty=2
+		)
+	 lines(density(object.pbp.norm$E[,2]),lty=2)
+	 lines(density(object.pbp.norm$E[,3]),lty=2)
+	 legend(x=-38.5,y=0.6, legend="signal intensities (gainScan+RLM)",lty=2)
+	par(op)
+
+	#calculate the interarray CVs
+	#for raw data with PMT600
+	dtf.norm<-array.aggregate(object.raw.norm, log=F, method="Arithmetic")
+	
+	cDtf.norm<-dtf.norm$C
+	cgDtf.norm<-dtf.norm$cgenes
+	interArray_ccv.norm<-interArrayCVs(cDtf.norm, cgDtf.norm)#sqrt(apply(cDtf.norm, 1, var))/apply(cDtf.norm, 1, 
+	
+	#now do the PMT fitted and normalizatio 
+	cDtf.pbp.norm<-object.pbp.norm$C
+	cgDtf.pbp.norm<-object.pbp.norm$cgenes
+	interArray_ccv.pbp.norm<-interArrayCVs(cDtf.pbp.norm, cgDtf.pbp.norm)#sqrt(apply(cDtf.5pl.norm, 1,		
+	
+	#show the mean CVs
+	mean(interArray_ccv.norm$cv)#0.052
+	mean(interArray_ccv.pbp.norm$cv)
+
+	#start plotting boxplot 					
+	interArray_ccv.norm$type<-"RLM Norm"
+	ccvByType<-interArray_ccv.norm
+	
+	interArray_ccv.pbp.norm$type<-"Gain-Scan+RLM"
+	ccvByType<-rbind(ccvByType,interArray_ccv.pbp.norm)
+	
+	ccvByType$type<-factor(ccvByType$type,levels<-c("RLM Norm", "Gain-Scan+RLM"))
+	
+	boxplot(ccvByType[,1]~type, data=ccvByType,log="",
+		main=("InterArray variance"),
+		xlab="",ylab="CV", 
+		ylim=c(0,0.065),#max(ccvByType[,1])
+		#),
+		col=2, outline=FALSE
+		);
+```
+
+# 4. Session Info
+  The version number of R and packages loaded for generating the vignette were
+```{r}
+  sessionInfo()
+```
+
+# 5. Reference and Citation
+  
