@@ -193,8 +193,8 @@ sub.effects.Dummy<-function(ndata,factor.effects)
 #factor.effects is the data list, holding the parameters estimated by RLM, 
 # this is the output of readFactors function. 
 #coding: Simple or Dummy or Deviation
-#Simple coding: means we are using the Grand mean as the reference, everything is towards the
-#			the grand mean. 
+#Simple coding: means we are using the Grand mean as the intercept, everything is towards the
+#			the reference (the first group). 
 #'@export
 sub.effects.Simple<-function(ndata,factor.effects)
 {
@@ -285,9 +285,12 @@ sub.effects.Simple<-function(ndata,factor.effects)
 #factor.effects is the data list, holding the parameters estimated by RLM,
 # array, block, intercept 
 # this is the output of readFactors function. 
-#coding: Simple or Dummy or Deviation
-#Simple coding: means we are using the Grand mean as the reference, everything is towards the
+#coding: Simple or Dummy or Deviation？mainly Deviation(???, at least for sure doing deviation.)
+#Deviation coding: means we are using the Grand cell mean as the reference, everything is towards the
 #			the grand mean. 
+#Simple coding: similar to Dummy coding, still using the first factor group as the reference, and all other 
+#		groups compare to this reference. the only different is the regression intercept, which is the grand cell mean
+#		instead of the reference cell mean.
 #'@export
 sub.effects<-function(ndata,factor.effects, coding=c("Deviation", "Simple","Dummy"))
 {
