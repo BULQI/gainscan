@@ -13,6 +13,10 @@ Build the vignette and install the code from github
 ```
 devtools::install_github("BULQI/gainscan", build_vignettes=TRUE)
 ```
+Then check the vignette for the sample code and a short tutorial
+```
+vignette("gainscan")
+``` 
 ## Bug Reporting
 
 Email to ffeng@bu.edu
